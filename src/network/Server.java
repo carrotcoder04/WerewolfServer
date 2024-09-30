@@ -2,6 +2,7 @@ package network;
 
 import helper.Helper;
 
+import javax.xml.transform.Source;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -32,6 +33,7 @@ public class Server {
                 while (clients.containsKey(id)) {
                     id = Helper.randomInt();
                 }
+                System.out.println("Client " + id + " connected");
                 Client client = new Client(clientSocket,id);
                 clients.put(id, client);
                 client.addEventOnDisconnected(this::clientDisconnected);
@@ -42,6 +44,7 @@ public class Server {
         }
     }
     public void clientDisconnected(Client client) {
+        System.out.println("Client " + client.getId() + " disconnected");
         clients.remove(client.getId());
     }
 }

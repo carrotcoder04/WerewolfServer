@@ -1,6 +1,6 @@
 package message.io;
 
-import helper.Constants;
+import config.Config;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -9,7 +9,7 @@ public class MessageWriter {
     private final byte[] buffer;
     private int position;
     public MessageWriter() {
-        buffer = new byte[Constants.MAX_BUFFER_WRITER];
+        buffer = new byte[Config.MAX_BUFFER_WRITER];
         position = 0;
     }
     public void writeInt(int value) throws ArrayIndexOutOfBoundsException {

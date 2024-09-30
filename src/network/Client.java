@@ -20,7 +20,8 @@ public class Client {
     private InputStream in;
     private OutputStream out;
     private EventListener<Client> onDisconnected;
-    public Client(Socket socket,int id) {
+
+    public Client(Socket socket, int id) {
         try {
             this.socket = socket;
             this.id = id;
@@ -34,18 +35,20 @@ public class Client {
             disconnect();
         }
     }
+
     private void readLoop() {
-        try {
-            byte[] buffer = new byte[1024];
-            while (true) {
+        byte[] buffer = new byte[1024];
+        while (true) {
+            try {
                 int len = in.read(buffer);
                 byte[] data = Arrays.copyOfRange(buffer, 0, len);
                 receiveMessage(data);
             }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            disconnect();
+            catch (IOException e) {
+               // e.printStackTrace();
+                disconnect();
+                break;
+            }
         }
     }
     private void receiveMessage(byte[] data) {

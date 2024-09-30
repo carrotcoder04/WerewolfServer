@@ -1,12 +1,14 @@
 package helper;
 
-import java.util.concurrent.ThreadLocalRandom;
+
+import java.util.Random;
 
 public class Helper {
+    private static final Random rand = new Random();
     public static int randomRange(int min, int max) {
-        return ThreadLocalRandom.current().nextInt(min, max + 1);
+        return rand.nextInt(min,max);
     }
     public static int randomInt() {
-        return randomRange(Constants.INT_MIN_VALUE,Constants.INT_MAX_VALUE);
+        return rand.nextInt();
     }
 }
