@@ -17,4 +17,7 @@ public class StringMessage implements MessageStructure{
         writer.writeString(message);
         return writer;
     }
+    public String getMessage() {
+        return message;
+    }
 }

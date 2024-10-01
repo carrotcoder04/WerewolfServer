@@ -5,6 +5,7 @@ import event.EventListener;
 import message.io.MessageReader;
 import message.io.MessageWriter;
 import message.structure.MessageStructure;
+import message.structure.StringMessage;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,7 +57,8 @@ public class Client {
         receiveMessage(reader);
     }
     private void receiveMessage(MessageReader reader) {
-
+        StringMessage message = new StringMessage(reader);
+        System.out.println(message.getMessage());
     }
     private void disconnect() {
         try {
@@ -85,6 +87,7 @@ public class Client {
     private void send(byte[] data) {
         try {
             out.write(data);
+            out.flush();
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -95,6 +98,11 @@ public class Client {
     }
     public void send(MessageStructure message) {
         send(message.getWriter());
+    }
+    public void sendAsync(MessageStructure message) {
+        CompletableFuture.runAsync(() -> {
+           send(message);
+        });
     }
     public int getId() {
         return id;
