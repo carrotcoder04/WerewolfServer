@@ -7,10 +7,13 @@ public class MessageReader {
     private int position;
     public MessageReader(byte[] buffer) {
         this.buffer = buffer;
-        this.position = 0;
+        this.position = 1;
     }
     public byte[] getBuffer() {
         return buffer;
+    }
+    public byte readTag() {
+        return buffer[0];
     }
     public int nextInt() throws ArrayIndexOutOfBoundsException {
         if (position + 3 >= buffer.length) {

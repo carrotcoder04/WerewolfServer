@@ -1,6 +1,6 @@
 package message.io;
 
-import config.Config;
+import config.network.NetworkConfig;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -9,8 +9,11 @@ public class MessageWriter {
     private final byte[] buffer;
     private int position;
     public MessageWriter() {
-        buffer = new byte[Config.MAX_BUFFER_WRITER];
-        position = 0;
+        buffer = new byte[NetworkConfig.MAX_BUFFER_WRITER];
+        position = 1;
+    }
+    public void writeTag(byte tag) {
+        buffer[0] = tag;
     }
     public void writeInt(int value) throws ArrayIndexOutOfBoundsException {
         if(position + 3 >= buffer.length) {

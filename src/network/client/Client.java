@@ -1,11 +1,12 @@
-package network;
+package network.client;
 
-import event.Event;
-import event.EventListener;
+import event.interfaces.Event;
+import event.listener.EventListener;
 import message.io.MessageReader;
 import message.io.MessageWriter;
-import message.structure.MessageStructure;
-import message.structure.StringMessage;
+import clientstate.state.ClientState;
+import clientstate.handler.ClientMessageHandler;
+import message.data.Message;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,15 +21,16 @@ public class Client {
     private int id;
     private InputStream in;
     private OutputStream out;
-    private EventListener<Client> onDisconnected;
-
+    private EventListener<Client> onDisconnectedEvents;
+    private ClientState clientState;
+    private ClientMessageHandler stateHandler;
     public Client(Socket socket, int id) {
         try {
             this.socket = socket;
             this.id = id;
             in = socket.getInputStream();
             out = socket.getOutputStream();
-            onDisconnected = new EventListener<>();
+            onDisconnectedEvents = new EventListener<>();
             CompletableFuture.runAsync(this::readLoop);
         }
         catch (IOException e) {
@@ -36,7 +38,6 @@ public class Client {
             disconnect();
         }
     }
-
     private void readLoop() {
         byte[] buffer = new byte[1024];
         while (true) {
@@ -57,8 +58,10 @@ public class Client {
         receiveMessage(reader);
     }
     private void receiveMessage(MessageReader reader) {
-        StringMessage message = new StringMessage(reader);
-        System.out.println(message.getMessage());
+        if(stateHandler != null) {
+            byte tag = reader.readTag();
+            stateHandler.onMessage(this,tag,reader);
+        }
     }
     private void disconnect() {
         try {
@@ -79,15 +82,14 @@ public class Client {
         catch (IOException e) {
             e.printStackTrace();
         }
-        onDisconnected.invoke(this);
+        onDisconnectedEvents.invoke(this);
     }
     public void addEventOnDisconnected(Event<Client> event) {
-        onDisconnected.addEvent(event);
+        onDisconnectedEvents.addEvent(event);
     }
     private void send(byte[] data) {
         try {
             out.write(data);
-            out.flush();
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -96,15 +98,30 @@ public class Client {
     private void send(MessageWriter message) {
         send(message.getBuffer());
     }
-    public void send(MessageStructure message) {
+    public void send(Message message) {
         send(message.getWriter());
     }
-    public void sendAsync(MessageStructure message) {
+    public void sendAsync(Message message) {
         CompletableFuture.runAsync(() -> {
            send(message);
         });
     }
     public int getId() {
         return id;
+    }
+//    public ClientState getClientState() {
+//        return clientState;
+//    }
+    public void setClientState(ClientState clientState) {
+        this.clientState = clientState;
+        if(stateHandler != null) {
+            stateHandler.onExit(this);
+        }
+        stateHandler = ClientMessageHandler.getStateHandler(clientState);
+        stateHandler.onEnter(this);
+    }
+    @Override
+    public String toString() {
+        return String.format("Client id: %d, Client state: %s", id, clientState);
     }
 }

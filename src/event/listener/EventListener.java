@@ -1,4 +1,6 @@
-package event;
+package event.listener;
+
+import event.interfaces.Event;
 
 import java.util.ArrayList;
 
