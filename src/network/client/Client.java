@@ -2,11 +2,12 @@ package network.client;
 
 import event.interfaces.Event;
 import event.listener.EventListener;
-import message.io.MessageReader;
-import message.io.MessageWriter;
+import game.Player;
+import io.Reader;
+import io.Writer;
 import clientstate.state.ClientState;
 import clientstate.handler.ClientMessageHandler;
-import message.data.Message;
+import serialization.Serializable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +25,7 @@ public class Client {
     private EventListener<Client> onDisconnectedEvents;
     private ClientState clientState;
     private ClientMessageHandler stateHandler;
+    private Player player;
     public Client(Socket socket, int id) {
         try {
             this.socket = socket;
@@ -47,17 +49,16 @@ public class Client {
                 receiveMessage(data);
             }
             catch (IOException e) {
-               // e.printStackTrace();
                 disconnect();
                 break;
             }
         }
     }
     private void receiveMessage(byte[] data) {
-        MessageReader reader = new MessageReader(data);
+        Reader reader = new Reader(data);
         receiveMessage(reader);
     }
-    private void receiveMessage(MessageReader reader) {
+    private void receiveMessage(Reader reader) {
         if(stateHandler != null) {
             byte tag = reader.readTag();
             stateHandler.onMessage(this,tag,reader);
@@ -87,37 +88,55 @@ public class Client {
     public void addEventOnDisconnected(Event<Client> event) {
         onDisconnectedEvents.addEvent(event);
     }
-    private void send(byte[] data) {
+    public void send(byte[] data) {
         try {
+            System.out.println("tag: " + data[0] + ",len: " + data.length);
             out.write(data);
         }
         catch (IOException e) {
             e.printStackTrace();
         }
     }
-    private void send(MessageWriter message) {
+    public void sendAsync(byte[] data) {
+        CompletableFuture.runAsync(() -> {
+           send(data);
+        });
+    }
+    private void send(byte tag,Writer message) {
+        message.writeTag(tag);
         send(message.getBuffer());
     }
-    public void send(Message message) {
-        send(message.getWriter());
+    public void send(byte tag) {
+        byte[] buffer = new byte[1];
+        buffer[0] = tag;
+        send(buffer);
     }
-    public void sendAsync(Message message) {
+    public void send(byte tag,Serializable message) {
+        send(tag,message.serialize());
+    }
+    public void sendAsync(byte tag,Serializable message) {
         CompletableFuture.runAsync(() -> {
-           send(message);
+            send(tag,message);
         });
     }
     public int getId() {
         return id;
     }
-//    public ClientState getClientState() {
-//        return clientState;
-//    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
     public void setClientState(ClientState clientState) {
         this.clientState = clientState;
         if(stateHandler != null) {
             stateHandler.onExit(this);
         }
-        stateHandler = ClientMessageHandler.getStateHandler(clientState);
+        stateHandler = clientState.getClientMessageHandler();
         stateHandler.onEnter(this);
     }
     @Override

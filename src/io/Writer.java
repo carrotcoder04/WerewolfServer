@@ -1,15 +1,20 @@
-package message.io;
+package io;
 
 import config.network.NetworkConfig;
+import serialization.Serializable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-public class MessageWriter {
+public class Writer {
     private final byte[] buffer;
     private int position;
-    public MessageWriter() {
+    public Writer() {
         buffer = new byte[NetworkConfig.MAX_BUFFER_WRITER];
+        position = 1;
+    }
+    public Writer(int size) {
+        buffer = new byte[size];
         position = 1;
     }
     public void writeTag(byte tag) {
@@ -41,7 +46,23 @@ public class MessageWriter {
             buffer[position++] = bytes[i];
         }
     }
+    public void writeBytes(byte[] bytes) throws ArrayIndexOutOfBoundsException {
+        if(position + bytes.length - 1 >= buffer.length) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        System.arraycopy(bytes, 0, buffer, position, bytes.length);
+        position += bytes.length;
+    }
     public byte[] getBuffer() {
         return Arrays.copyOfRange(buffer, 0, position);
+    }
+    private void write(Writer writer) {
+        writeBytes(writer.getBufferNoTag());
+    }
+    public void write(Serializable serializable) {
+        write(serializable.serialize());
+    }
+    private byte[] getBufferNoTag() {
+        return Arrays.copyOfRange(buffer, 1, position);
     }
 }

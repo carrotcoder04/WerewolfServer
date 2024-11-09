@@ -2,8 +2,8 @@ package network.server;
 
 import helper.RandomUtils;
 import clientstate.state.ClientState;
-import message.data.Message;
 import network.client.Client;
+import serialization.Serializable;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -54,15 +54,15 @@ public class Server {
         }
         return id;
     }
-    public void broadcastAll(Message message) {
+    public void broadcastAll(byte tag,Serializable message) {
         for (Client client : clients.values()) {
-            client.sendAsync(message);
+            client.sendAsync(tag,message);
         }
     }
     private void onClientConnected(Client client) {
         clients.put(client.getId(), client);
         client.addEventOnDisconnected(this::onClientDisconnected);
-        client.setClientState(ClientState.CLIENT_CONNECTED);
+        client.setClientState(ClientState.CLIENT_INFO_HANDLER);
     }
     public void onClientDisconnected(Client client) {
         System.out.println(client);

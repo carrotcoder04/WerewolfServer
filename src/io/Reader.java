@@ -1,11 +1,11 @@
-package message.io;
+package io;
 
 import java.nio.charset.StandardCharsets;
 
-public class MessageReader {
+public class Reader {
     private final byte[] buffer;
     private int position;
-    public MessageReader(byte[] buffer) {
+    public Reader(byte[] buffer) {
         this.buffer = buffer;
         this.position = 1;
     }
