@@ -9,9 +9,7 @@ import clientstate.state.ClientState;
 import clientstate.handler.ClientMessageHandler;
 import serialization.Serializable;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -20,8 +18,8 @@ import java.util.concurrent.CompletableFuture;
 public class Client {
     private Socket socket;
     private int id;
-    private InputStream in;
-    private OutputStream out;
+    private DataInputStream in;
+    private DataOutputStream out;
     private EventListener<Client> onDisconnectedEvents;
     private ClientState clientState;
     private ClientMessageHandler stateHandler;
@@ -30,8 +28,8 @@ public class Client {
         try {
             this.socket = socket;
             this.id = id;
-            in = socket.getInputStream();
-            out = socket.getOutputStream();
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
             onDisconnectedEvents = new EventListener<>();
             CompletableFuture.runAsync(this::readLoop);
         }
@@ -44,8 +42,19 @@ public class Client {
         byte[] buffer = new byte[1024];
         while (true) {
             try {
-                int len = in.read(buffer);
-                byte[] data = Arrays.copyOfRange(buffer, 0, len);
+                int size = in.readInt();
+                byte[] data = new byte[size];
+                int len = 0;
+                int byteRead = 0;
+                while (byteRead < size) {
+                    len = in.read(data, byteRead, size - byteRead);
+                    if (len > 0) {
+                        byteRead += len;
+                    }
+                    else {
+                        throw new IOException();
+                    }
+                }
                 receiveMessage(data);
             }
             catch (IOException e) {
@@ -90,7 +99,7 @@ public class Client {
     }
     public void send(byte[] data) {
         try {
-            System.out.println("tag: " + data[0] + ",len: " + data.length);
+            out.writeInt(data.length);
             out.write(data);
         }
         catch (IOException e) {

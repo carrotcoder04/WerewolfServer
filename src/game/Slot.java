@@ -6,7 +6,9 @@ public class Slot {
      public Slot(int id) {
           this.id = id;
      }
-
+     public int getId() {
+          return id;
+     }
      public Player getPlayer() {
           return player;
      }
