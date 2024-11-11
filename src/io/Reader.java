@@ -19,7 +19,7 @@ public class Reader {
         if (position + 3 >= buffer.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        return (buffer[position++] & 0xFF) | ((buffer[position++] << 8) & 0xFF) | ((buffer[position++] << 16) & 0xFF)  | ((buffer[position++] << 24) & 0xFF);
+        return (buffer[position++] & 0xFF) | ((buffer[position++] & 0xFF) << 8) | ((buffer[position++] & 0xFF) << 16)  | ((buffer[position++] & 0xFF) << 24);
     }
     public byte nextByte() throws ArrayIndexOutOfBoundsException {
         if (position >= buffer.length) {

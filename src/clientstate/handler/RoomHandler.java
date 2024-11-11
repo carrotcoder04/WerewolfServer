@@ -8,7 +8,7 @@ public class RoomHandler extends ClientMessageHandler {
 
      @Override
      public void onEnter(Client client) {
-          RoomManager.getInstance().updatePlayer();
+          RoomManager.getInstance().onPlayerJoin(client.getPlayer());
      }
 
      @Override
@@ -17,6 +17,6 @@ public class RoomHandler extends ClientMessageHandler {
      }
      @Override
      public void onExit(Client client) {
-
+          RoomManager.getInstance().onPlayerLeave(client.getPlayer());
      }
 }

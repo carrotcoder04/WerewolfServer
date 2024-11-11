@@ -7,17 +7,20 @@ import io.Reader;
 import io.Writer;
 import clientstate.state.ClientState;
 import clientstate.handler.ClientMessageHandler;
+import message.tag.MessageTag;
 import serialization.Serializable;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 
 
 public class Client {
     private Socket socket;
     private int id;
+    private boolean isDisconnected;
     private DataInputStream in;
     private DataOutputStream out;
     private EventListener<Client> onDisconnectedEvents;
@@ -33,16 +36,15 @@ public class Client {
             onDisconnectedEvents = new EventListener<>();
             CompletableFuture.runAsync(this::readLoop);
         }
-        catch (IOException e) {
+        catch (Exception e) {
             e.printStackTrace();
             disconnect();
         }
     }
     private void readLoop() {
-        byte[] buffer = new byte[1024];
         while (true) {
             try {
-                int size = in.readInt();
+                int size = in.readShort();
                 byte[] data = new byte[size];
                 int len = 0;
                 int byteRead = 0;
@@ -61,6 +63,10 @@ public class Client {
                 disconnect();
                 break;
             }
+            catch (Exception e) {
+                e.printStackTrace();
+                break;
+            }
         }
     }
     private void receiveMessage(byte[] data) {
@@ -74,6 +80,10 @@ public class Client {
         }
     }
     private void disconnect() {
+        if(isDisconnected) {
+            return;
+        }
+        isDisconnected = true;
         try {
             in.close();
         }
@@ -92,6 +102,7 @@ public class Client {
         catch (IOException e) {
             e.printStackTrace();
         }
+        setClientState(null);
         onDisconnectedEvents.invoke(this);
     }
     public void addEventOnDisconnected(Event<Client> event) {
@@ -99,11 +110,12 @@ public class Client {
     }
     public void send(byte[] data) {
         try {
-            out.writeInt(data.length);
+            out.writeShort(data.length);
             out.write(data);
         }
-        catch (IOException e) {
-            e.printStackTrace();
+        catch (Exception e) {
+            System.err.println(e.getClass());
+            disconnect();
         }
     }
     public void sendAsync(byte[] data) {
@@ -145,8 +157,10 @@ public class Client {
         if(stateHandler != null) {
             stateHandler.onExit(this);
         }
-        stateHandler = clientState.getClientMessageHandler();
-        stateHandler.onEnter(this);
+        if(clientState != null) {
+            stateHandler = clientState.getClientMessageHandler();
+            stateHandler.onEnter(this);
+        }
     }
     @Override
     public String toString() {

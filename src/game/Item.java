@@ -6,7 +6,7 @@ import serialization.Serializable;
 
 public class Item implements Serializable<Item> {
      private ItemType type;
-     private String imagePath;
+     private int indexOfAsset;
      public Item(Reader reader) {
           deserialize(reader);
      }
@@ -17,14 +17,14 @@ public class Item implements Serializable<Item> {
      @Override
      public void deserialize(Reader reader) {
           this.type = ItemType.values()[reader.nextByte()];
-          this.imagePath = reader.nextString();
+          this.indexOfAsset = reader.nextInt();
      }
      @Override
      public Writer serialize() {
-          Writer writer = new Writer(100);
+          Writer writer = new Writer(6);
           byte type = (byte) this.type.ordinal();
           writer.writeByte(type);
-          writer.writeString(imagePath);
+          writer.writeInt(indexOfAsset);
           return writer;
      }
 }
