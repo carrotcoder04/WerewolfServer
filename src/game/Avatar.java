@@ -28,10 +28,11 @@ public class Avatar implements Serializable<Avatar> {
      }
      @Override
      public Writer serialize() {
-          Writer writer = new Writer(66);
+          Writer writer = new Writer(1024);
           for(Item item : items.values()) {
                writer.write(item);
           }
+          System.out.println(writer.getBuffer().length);
           return writer;
      }
 }

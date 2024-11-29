@@ -1,6 +1,7 @@
 package game;
 
-public class Role {
+
+public class Role  {
      private RoleInfo info;
      public Role(RoleInfo info){
           this.setInfo(info);

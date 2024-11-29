@@ -123,7 +123,7 @@ public class Client {
            send(data);
         });
     }
-    private void send(byte tag,Writer message) {
+    public void send(byte tag,Writer message) {
         message.writeTag(tag);
         send(message.getBuffer());
     }
