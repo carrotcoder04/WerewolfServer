@@ -45,6 +45,12 @@ public class RoomManager  {
           updatePlayer();
           playerCount++;
           if(playerCount == 12) {
+               try {
+                    Thread.sleep(1000);
+               }
+               catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+               }
                startGame();
           }
      }
@@ -56,17 +62,15 @@ public class RoomManager  {
                writer.writeByte((byte)pools.get(i).getInfo().ordinal());
           }
           sendAll(MessageTag.ALL_ROLES,writer,slots);
-          int index = 0;
-          while(pools.size() > 0) {
+          for(int i=0;i<playerCount;i++) {
                int random = RandomUtils.randomRange(0,pools.size());
                Role role = pools.get(random);
-               Player player = getSlot(index).getPlayer();
+               Player player = getSlot(i).getPlayer();
                player.setRole(role);
                pools.remove(random);
                Writer roleWriter = new Writer();
                roleWriter.writeByte((byte)role.getInfo().ordinal());
                player.getClient().send(MessageTag.MY_ROLES,roleWriter);
-               index++;
           }
      }
      private ArrayList<Role> getRolePools() {
