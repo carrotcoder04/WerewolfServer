@@ -8,7 +8,7 @@ public class Main {
         server.start();
         Scanner scanner = new Scanner(System.in);
         while(true) {
-            String message = scanner.nextLine();
+            scanner.nextLine();
         }
     }
 }

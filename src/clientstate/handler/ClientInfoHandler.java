@@ -27,7 +27,7 @@ public class ClientInfoHandler extends ClientMessageHandler {
                 playerInfo.setId(id);
                 Player player = new Player(playerInfo,client);
                 client.setPlayer(player);
-                client.send(MessageTag.YOUR_INFO, playerInfo);
+                client.send(MessageTag.MY_INFO, playerInfo);
             }
             case MessageTag.JOIN_ROOM -> {
                 client.setClientState(ClientState.ROOM_HANDLER);

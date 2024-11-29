@@ -7,15 +7,10 @@ import io.Reader;
 import io.Writer;
 import clientstate.state.ClientState;
 import clientstate.handler.ClientMessageHandler;
-import message.tag.MessageTag;
 import serialization.Serializable;
-
 import java.io.*;
 import java.net.Socket;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
-
 
 public class Client {
     private Socket socket;
