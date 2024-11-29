@@ -13,13 +13,15 @@ import java.util.concurrent.CompletableFuture;
 public class RoomManager  {
      private static RoomManager instance = new RoomManager();
      private ArrayList<Slot> slots;
-     private List<Slot> wereWolfTeam;
+     private ArrayList<Slot> wereWolfTeam;
+     private ArrayList<Slot> deathPlayers;
      private int playerCount;
      private boolean isGameStarted;
-     private int maxSlot = 1;
+     private int maxSlot = 12;
      private int minimumVote = 7;
      private RoomManager() {
           slots = new ArrayList<>();
+          deathPlayers = new ArrayList<>();
           for(int i=0;i<maxSlot;i++) {
                slots.add(new Slot(i));
           }
@@ -34,13 +36,23 @@ public class RoomManager  {
      }
      public void playerChat(Player player, String message) {
           System.out.println(player.getId() + " " + player.getName() + ": "+message);
-          ArrayList<Slot> slots = new ArrayList<>(this.slots);
+          ArrayList<Slot> slots;
+          if(!player.isAlive()) {
+              slots = new ArrayList<>(deathPlayers);
+          }
+          else if(GameTime.getInstance().getState() == GameState.NIGHT) {
+                slots = new ArrayList<>(wereWolfTeam);
+          }
+          else {
+               slots = new ArrayList<>(this.slots);
+          }
           slots.remove(player.getId());
           Writer writer = new Writer();
           writer.writeByte((byte)player.getId());
           writer.writeString(message);
           sendAll(MessageTag.CHAT,writer,slots);
      }
+
      public static RoomManager getInstance() {
           return instance;
      }
@@ -54,6 +66,9 @@ public class RoomManager  {
                }
           }
           return -1;
+     }
+     public void addDeathPlayer(Player player) {
+          deathPlayers.add(player.getMySlot());
      }
      public Slot getSlot(int index) {
           return slots.get(index);
@@ -86,9 +101,13 @@ public class RoomManager  {
           switch (state) {
                case NIGHT -> {
                     notification("Màn đêm buông xuống dân làng đi ngủ.");
+                    updateCanvote(state);
+                    updateCanChat(state);
                }
                case DAY -> {
                     notification("Trời sáng mời cả làng thức dậy.");
+                    updateCanvote(state);
+                    updateCanChat(state);
                     if(minimumVote > 1) {
                          minimumVote--;
                     }
@@ -98,11 +117,108 @@ public class RoomManager  {
                }
                case VOTE -> {
                     notification("Đến giờ bỏ phiếu, tối thiểu " + minimumVote + " phiếu bầu.");
+                    updateCanvote(state);
+               }
+               case VOTE_COMPLETE -> {
+                    closeVoting(this.minimumVote);
+                    clearVoting();
+               }
+               case WOLF_VOTE_COMPLETE -> {
+                    closeVoting(0);
+                    clearVoting();
                }
           };
           Writer writer = new Writer(5);
           writer.writeByte((byte)state.ordinal());
           sendAll(MessageTag.CHANGE_GAME_STATE,writer,slots);
+     }
+     private void closeVoting(int minimumVote) {
+          int maxNumVotes = minimumVote;
+          Player playerVoted = null;
+          for(Slot slot : slots) {
+               Player player = slot.getPlayer();
+               if(player.getNumVotes() > maxNumVotes) {
+                    maxNumVotes = player.getNumVotes();
+                    playerVoted = player;
+               }
+          }
+          if(playerVoted == null) {
+               if(minimumVote == 0) {
+                    notification("Không ai bị giết.");
+               }
+               else {
+                    notification("Không ai bị treo cổ.");
+               }
+          }
+          else {
+               playerVoted.setAlive(false);
+               if(minimumVote == 0) {
+                    notification("Ma sói đã cắn chết " +  playerVoted.getId() + " " + playerVoted.getName() + ".");
+               }
+               else {
+                    notification("Dân làng đã treo cổ " +  playerVoted.getId() + " " + playerVoted.getName() + ".");
+               }
+          }
+     }
+     private void clearVoting() {
+          for(Slot slot : slots) {
+               slot.getPlayer().unvote();
+          }
+     }
+     private void updateCanvote(GameState state) {
+          switch(state) {
+               case NIGHT -> {
+                    for(Slot slot : slots) {
+                         Player player = slot.getPlayer();
+                         if(!player.isAlive()) {
+                             continue;
+                         }
+                         if(player.getRole().getInfo().getTeam() == Team.WOLF) {
+                              player.setCanVote(true);
+                         }
+                         else {
+                              player.setCanVote(false);
+                         }
+                    }
+               }
+               case DAY -> {
+                    for(Slot slot : slots) {
+                         Player player = slot.getPlayer();
+                         if(player.isAlive()) {
+                              player.setCanVote(false);
+                         }
+                    }
+               }
+               case VOTE -> {
+                    for(Slot slot : slots) {
+                         Player player = slot.getPlayer();
+                         if(player.isAlive()) {
+                              player.setCanVote(true);
+                         }
+                    }
+               }
+          }
+     }
+     private void updateCanChat(GameState state) {
+          switch(state) {
+               case NIGHT -> {
+                    for(Slot slot : slots) {
+                         Player player = slot.getPlayer();
+                         if(player.getRole().getInfo().getTeam() == Team.WOLF) {
+                              player.setCanChat(true);
+                         }
+                         else {
+                              player.setCanChat(false);
+                         }
+                    }
+               }
+               case DAY -> {
+                    for(Slot slot : slots) {
+                         Player player = slot.getPlayer();
+                         player.setCanChat(true);
+                    }
+               }
+          }
      }
      private void startGame() {
           isGameStarted = true;
@@ -149,12 +265,12 @@ public class RoomManager  {
           roles.add(new Seer());
           roles.add(new Mayor());
           roles.add(new Medium());
-          roles.add(new Priest());
           roles.add(new Witch());
           roles.add(new Doctor());
+          roles.add(new BodyGuard());
           roles.add(new LoudMounth());
           roles.add(new WereWolf());
-          roles.add(new JuniorWereWolf());
+          roles.add(new AlphaWereWolf());
           roles.add(new WolfSeer());
           roles.add(new Fool());
           roles.add(new Corruptor());
@@ -178,6 +294,9 @@ public class RoomManager  {
                PlayerInfo player = slot.getPlayer().getPlayerInfo();
                sendAll(MessageTag.UPDATE_ROOM, player,this.slots);
           }
+     }
+     public void sendWolfTeam(byte tag,Writer writer) {
+          sendAll(tag,writer,wereWolfTeam);
      }
      private void sendAll(byte[] data,List<Slot> slots) {
           for (Slot slot : slots) {

@@ -43,7 +43,7 @@ public class GameTime {
                          catch (InterruptedException e) {
                               throw new RuntimeException(e);
                          }
-                         countDown("Đang say giấc", 30,() -> setState(GameState.DAY));
+                         countDown("Đang say giấc", 20,() -> setState(GameState.WOLF_VOTE_COMPLETE));
                     });
                }
                case DAY -> {
@@ -57,7 +57,7 @@ public class GameTime {
                          catch (InterruptedException e) {
                               throw new RuntimeException(e);
                          }
-                         countDown("Đang thảo luận", 30,() -> setState(GameState.VOTE));
+                         countDown("Đang thảo luận", 20,() -> setState(GameState.VOTE));
                     });
                }
                case VOTE -> {
@@ -68,8 +68,14 @@ public class GameTime {
                          catch (InterruptedException e) {
                               throw new RuntimeException(e);
                          }
-                         countDown("Đang bỏ phiếu", 30,() -> setState(GameState.NIGHT));
+                         countDown("Đang bỏ phiếu", 20,() -> setState(GameState.VOTE_COMPLETE));
                     });
+               }
+               case VOTE_COMPLETE -> {
+                    setState(GameState.NIGHT);
+               }
+               case WOLF_VOTE_COMPLETE -> {
+                    setState(GameState.DAY);
                }
           }
      }

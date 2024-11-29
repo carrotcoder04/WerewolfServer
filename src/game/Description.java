@@ -8,8 +8,10 @@ public class Description {
      public static final String JAILER = "Vào ban ngày, bạn có thể chọn một người chơi để giam vô ngục vào đêm hôm sau! Bạn có thể nói chuyện ẩn danh với người chơi bị giam vào ban đêm. Người đó không thể sử dụng khả năng của họ và sẽ không bị tấn công. Bạn có một viên đạn để giết người chơi bị giam vào ngục trong đêm.";
      public static final String WITCH = "Bạn có hai bình thuốc: Một bình dùng để giết và bình kia để bảo vệ người chơi. Bình bảo vệ chỉ được tiêu thụ nếu người chơi đó bị tấn công. Bạn không thể giết trong đêm đầu tiên.";
      public static final String DOCTOR = "Chọn một người chơi để che chở vào mỗi đêm. Người chơi đó sẽ không bị giết vào đêm đó.";
+     public static final String BODYGUARD = "Bạn có thể chọn một người chơi để bảo vệ mỗi đêm. Người được bảo vệ không thể bị giết vào đêm đó, thay vào đó bạn sẽ bị tấn công thay họ. Vì bạn rất khỏe nên sẽ không thể bị chết trong lần tấn công đầu tiên nhưng sẽ chết trong lần tấn công thứ hai. Mỗi đêm bạn sẽ tự bảo vệ chính mình.";
      public static final String LOUD_MOUTH = "Bạn có thể chọn một người chơi để tiết lộ vai trò của họ khi bạn chết.";
      public static final String WEREWOLF = "Mỗi đêm bạn có thể bỏ phiếu cùng đàn sói để chọn giết một người chơi.";
+     public static final String ALPHA_WEREWOLF = "Phiếu bầu ban đêm của bạn được nhân đôi.";
      public static final String SHADOW_WOLF = "Mỗi một lần trong trò chơi, bạn có thể nhân đôi số phiếu của đội mình trong ngày, trong khi tất cả các phiếu bầu sẽ được ẩn đi.";
      public static final String JUNIOR_WEREWOLF = "Bạn là sói trẻ. Bởi vì bạn rất dễ thương, bạn có thể chọn người chơi khác để chết theo bạn khi bạn bị giết.";
      public static final String WOLF_SEER = "Mỗi đêm, bạn có thể chọn một người chơi để xem vai trò của hắn ta. Nếu bạn là ma sói cuối cùng hoặc bạn từ bỏ khả năng của mình, bạn sẽ trở thành ma sói thường.";

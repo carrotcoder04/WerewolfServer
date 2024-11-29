@@ -23,4 +23,5 @@ public class Slot {
      public boolean isEmpty() {
           return player == null;
      }
+
 }

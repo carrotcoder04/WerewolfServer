@@ -1,5 +1,6 @@
 package clientstate.handler;
 
+import game.Player;
 import game.RoomManager;
 import io.Reader;
 import message.tag.MessageTag;
@@ -19,6 +20,14 @@ public class RoomHandler extends ClientMessageHandler {
           switch (tag) {
                case MessageTag.CHAT -> {
                     RoomManager.getInstance().playerChat(client.getPlayer(),reader.nextString());
+               }
+               case MessageTag.SELECT_PLAYER -> {
+                    Player player = RoomManager.getInstance().getSlot(reader.nextByte()).getPlayer();
+                    client.getPlayer().selectPlayer(player);
+               }
+               case MessageTag.PING -> {
+                    String message = reader.nextString();
+                    System.err.println(message);
                }
           }
      }
