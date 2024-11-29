@@ -23,6 +23,23 @@ public class RoomManager  {
                slots.add(new Slot(i));
           }
      }
+     public void notification(String message) {
+          notification(message,slots);
+     }
+     public void notification(String message,ArrayList<Slot> slots) {
+          Writer writer = new Writer();
+          writer.writeString(message);
+          sendAll(MessageTag.NOTIFICATION,writer,slots);
+     }
+     public void playerChat(Player player, String message) {
+          System.out.println(player.getId() + " " + player.getName() + ": "+message);
+          ArrayList<Slot> slots = new ArrayList<>(this.slots);
+          slots.remove(player.getId());
+          Writer writer = new Writer();
+          writer.writeByte((byte)player.getId());
+          writer.writeString(message);
+          sendAll(MessageTag.CHAT,writer,slots);
+     }
      public static RoomManager getInstance() {
           return instance;
      }
@@ -41,12 +58,19 @@ public class RoomManager  {
           return slots.get(index);
      }
      public void onPlayerJoin(Player player) {
+          notification(player.getId() + " " + player.getName() + " đã tham gia.");
           getSlot(player.getId()).setPlayer(player);
           updatePlayer();
           playerCount++;
           if(playerCount == 12) {
                try {
-                    Thread.sleep(1000);
+                    for(int i=5;i>0;i--) {
+                         if(playerCount < 12) {
+                              return;
+                         }
+                         notification("Trò chơi bắt đầu sau: " + i);
+                         Thread.sleep(1000);
+                    }
                }
                catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -91,6 +115,7 @@ public class RoomManager  {
      }
      public void onPlayerLeave(Player player) {
           System.out.println(player.getId() + " left the game");
+          notification(player.getId() + " " + player.getName() + " đã rời game.");
           getSlot(player.getId()).removePlayer();
           updatePlayer();
           playerCount--;

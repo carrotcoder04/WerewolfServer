@@ -14,11 +14,10 @@ public class ClientInfoHandler extends ClientMessageHandler {
     public void onEnter(Client client) {
         System.out.println("Client connected: " + client.getId());
     }
-
     @Override
     public void onMessage(Client client, byte tag, Reader reader) {
         switch (tag) {
-            case MessageTag.PLAY:
+            case MessageTag.PLAY -> {
                 int id = RoomManager.getInstance().getIdEmptySlot();
                 if(id == -1) {
                     client.send(MessageTag.ROOM_FULL);
@@ -29,13 +28,12 @@ public class ClientInfoHandler extends ClientMessageHandler {
                 Player player = new Player(playerInfo,client);
                 client.setPlayer(player);
                 client.send(MessageTag.YOUR_INFO, playerInfo);
-                break;
-            case MessageTag.JOIN_ROOM:
+            }
+            case MessageTag.JOIN_ROOM -> {
                 client.setClientState(ClientState.ROOM_HANDLER);
-                break;
+            }
         }
     }
-
     @Override
     public void onExit(Client client) {
 

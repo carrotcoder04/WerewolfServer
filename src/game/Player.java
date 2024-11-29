@@ -27,6 +27,9 @@ public class Player {
      public int getId() {
           return id;
      }
+     public String getName() {
+          return name;
+     }
      public void setSlot(int id) {
           try {
                Slot oldSlot = RoomManager.getInstance().getSlot(this.id);

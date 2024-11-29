@@ -11,4 +11,6 @@ public class MessageTag {
     public static final byte START_GAME = -122;
     public static final byte ALL_ROLES = -121;
     public static final byte MY_ROLES = -120;
+    public static final byte CHAT = -119;
+    public static final byte NOTIFICATION = -118;
 }
