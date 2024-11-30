@@ -7,4 +7,5 @@ public enum GameState {
      NIGHT,
      VOTE_COMPLETE,
      WOLF_VOTE_COMPLETE,
+     GAME_ENDED
 }

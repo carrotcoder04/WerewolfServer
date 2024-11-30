@@ -15,6 +15,7 @@ public class Player {
      private boolean canVote;
      private boolean canChat;
      private int numVotes;
+     private int maxNumVotable = 1;
      private Player selectPlayer;
      private Client client;
 
@@ -137,7 +138,7 @@ public class Player {
           return canChat;
      }
      public void vote(Player player) {
-          player.setNumVotes(player.getNumVotes() + 1);
+          player.setNumVotes(player.getNumVotes() + maxNumVotable);
           Writer writer = new Writer(6);
           writer.writeByte((byte)id);
           writer.writeByte((byte)player.getId());
@@ -153,7 +154,7 @@ public class Player {
      public void unvote() {
           if(isVoting()) {
                Writer writer = new Writer(6);
-               selectPlayer.setNumVotes(selectPlayer.getNumVotes() - 1);
+               selectPlayer.setNumVotes(selectPlayer.getNumVotes() - maxNumVotable);
                writer.writeByte((byte)id);
                writer.writeByte((byte)selectPlayer.getId());
                writer.writeByte((byte)selectPlayer.getNumVotes());
@@ -170,30 +171,19 @@ public class Player {
      public boolean isVoting() {
           return selectPlayer != null;
      }
+     public boolean isSelecteOldPlayer(Player player) {
+          return selectPlayer == player;
+     }
      public boolean isSameTeam(Player player) {
           return player.getRole().getInfo().getTeam() == role.getInfo().getTeam();
      }
+     public void onGameStateChanged(GameState state) {
+          role.onGameStateChanged(this,state);
+     }
      public void selectPlayer(Player player) {
-          if(!canVote) {
+          if(player == null) {
                return;
           }
-          if(!player.isAlive()) {
-              return;
-          }
-          if(GameTime.getInstance().getState() == GameState.NIGHT) {
-               if(isSameTeam(player)) {
-                    return;
-               }
-          }
-          if(selectPlayer == player) {
-               unvote();
-          }
-          else if(selectPlayer == null) {
-               vote(player);
-          }
-          else if(selectPlayer != player) {
-               unvote();
-               vote(player);
-          }
+          role.onSelectPlayer(this,player,GameTime.getInstance().getState());
      }
 }
